@@ -5,10 +5,11 @@ import (
   "log"
   "strings"
   "strconv"
-  "flag"
 
   "github.com/lukaszsagol/meteorologist/forecast"
   "github.com/lukaszsagol/meteorologist/output"
+  "github.com/namsral/flag"
+  "github.com/aws/aws-lambda-go/lambda"
 )
 
 func mapPeopleIds(ppl *string)(ret []int) {
@@ -59,6 +60,10 @@ func parseArguments()(int, string, string, []int, string, string) {
 }
 
 func main() {
+  lambda.Start(Call)
+}
+
+func Call()(string, error) {
   i, accId, token, people, slackToken, channel := parseArguments()
 
   lastCheckedAt := time.Now().Add(time.Hour * time.Duration(i * -1))
@@ -68,4 +73,6 @@ func main() {
   projects := forecast.FetchProjects(api)
 
   output.SlackNotify(assignments, projects, slackToken, channel)
+
+  return "OK", nil;
 }
